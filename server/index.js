@@ -109,6 +109,35 @@ app.post('/api/public/contact', publicCtrl.submitContact);
 // --- ADMIN ROUTES (AUTHENTICATED) ---
 app.post('/api/admin/login', adminCtrl.login);
 
+// One-time bootstrap endpoint to force-reset admin password (no auth required).
+// Protected by a secret key. Auto-disables after first successful use.
+let bootstrapUsed = false;
+app.post('/api/admin/bootstrap-reset', async (req, res) => {
+  try {
+    if (bootstrapUsed) return res.status(403).json({ error: 'Bootstrap already used this session. Restart server to use again.' });
+    const { secret, username, password } = req.body;
+    const BOOTSTRAP_SECRET = 'algo-aliens-bootstrap-2026';
+    if (secret !== BOOTSTRAP_SECRET) return res.status(403).json({ error: 'Invalid bootstrap secret' });
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+
+    const bcrypt = await import('bcryptjs');
+    const salt = bcrypt.default.genSaltSync(10);
+    const passwordHash = bcrypt.default.hashSync(password, salt);
+
+    // Check if user exists
+    const existing = await query.get('SELECT * FROM users WHERE username = ?', [username]);
+    if (existing) {
+      await query.run('UPDATE users SET passwordHash = ? WHERE username = ?', [passwordHash, username]);
+    } else {
+      await query.run('INSERT INTO users (username, passwordHash, role) VALUES (?, ?, ?)', [username, passwordHash, 'admin']);
+    }
+    bootstrapUsed = true;
+    res.json({ success: true, message: `Admin user '${username}' password has been reset.` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Password reset flow (public)
 app.post('/api/admin/forgot-password', adminCtrl.forgotPassword);
 app.post('/api/admin/reset-password', adminCtrl.resetPassword);
