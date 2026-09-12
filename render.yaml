@@ -13,4 +13,5 @@ services:
       - key: ADMIN_DEFAULT_USERNAME
         value: info@algorithmaliens.com
       - key: ADMIN_DEFAULT_PASSWORD
-        value: admin123
+        value: algo@951
+

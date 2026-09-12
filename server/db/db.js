@@ -253,7 +253,8 @@ export async function initDb() {
 
   const adminExists = await query.get("SELECT * FROM users WHERE username = ?", [defaultAdminUsername]);
   if (!adminExists) {
-    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "admin123";
+    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "algo@951";
+
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(defaultPassword, salt);
     await query.run(
