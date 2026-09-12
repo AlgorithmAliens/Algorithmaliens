@@ -42,12 +42,6 @@ const Admin = () => {
   const [resetError, setResetError] = useState(null);
   const [resetSuccess, setResetSuccess] = useState(null);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchData(activeTab);
-    }
-  }, [isLoggedIn, activeTab]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setAuthLoading(true);
@@ -107,6 +101,13 @@ const Admin = () => {
       setLoadingList(false);
     }
   };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchData(activeTab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, activeTab]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to permanently delete this record?')) return;
