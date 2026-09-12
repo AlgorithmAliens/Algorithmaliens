@@ -132,13 +132,13 @@ const Admin = () => {
     }
   };
 
-  // Image Format Validation
-  const validateImageUrl = (url) => {
+  // Media Format Validation
+  const validateMediaUrl = (url) => {
     if (!url) return true;
     const cleanUrl = url.split('?')[0].split('#')[0];
-    const isValidImage = cleanUrl.toLowerCase().endsWith('.jpg') || cleanUrl.toLowerCase().endsWith('.jpeg') || cleanUrl.toLowerCase().endsWith('.png');
-    if (!isValidImage) {
-      alert('Format warning: We strongly recommend using high-quality .jpg, .jpeg, or .png images for site-wide visual compliance.');
+    const isValidMedia = cleanUrl.toLowerCase().match(/\.(jpg|jpeg|png|mp4|webm|mov)$/);
+    if (!isValidMedia) {
+      alert('Format warning: We strongly recommend using high-quality images (.jpg, .png) or videos (.mp4, .webm) for site-wide visual compliance.');
     }
     return true;
   };
@@ -147,10 +147,11 @@ const Admin = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Enforce JPG/JPEG/PNG check
+    // Enforce Format check
     const extension = file.name.split('.').pop().toLowerCase();
-    if (extension !== 'jpg' && extension !== 'jpeg' && extension !== 'png') {
-      alert('Action Blocked: Only JPG, JPEG, and PNG file formats are supported.');
+    const validExtensions = ['jpg', 'jpeg', 'png', 'mp4', 'webm', 'mov'];
+    if (!validExtensions.includes(extension)) {
+      alert(`Action Blocked: Only ${validExtensions.join(', ')} file formats are supported.`);
       e.target.value = ''; // clear input
       return;
     }
@@ -181,10 +182,10 @@ const Admin = () => {
     setActionSuccess(null);
 
     // Validate images before saving
-    if (editingItem.image && !validateImageUrl(editingItem.image)) return;
-    if (editingItem.photo && !validateImageUrl(editingItem.photo)) return;
-    if (editingItem.banner && !validateImageUrl(editingItem.banner)) return;
-    if (editingItem.url && activeTab === 'gallery' && editingItem.type === 'image' && !validateImageUrl(editingItem.url)) return;
+    if (editingItem.image && !validateMediaUrl(editingItem.image)) return;
+    if (editingItem.photo && !validateMediaUrl(editingItem.photo)) return;
+    if (editingItem.banner && !validateMediaUrl(editingItem.banner)) return;
+    if (editingItem.url && activeTab === 'gallery' && editingItem.type === 'image' && !validateMediaUrl(editingItem.url)) return;
 
     try {
       const isNew = !listData.some(item => item.id === editingItem.id);
@@ -452,7 +453,7 @@ const Admin = () => {
             <h1 className="text-gradient fw-bold mb-1">Administrative Terminal</h1>
             <p className="text-muted-custom small mb-0">Direct access to the core database services</p>
           </div>
-          <button onClick={handleLogout} className="btn border border-secondary text-light px-3 py-2 d-flex align-items-center gap-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
+          <button onClick={handleLogout} className="btn border border-secondary  px-3 py-2 d-flex align-items-center gap-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
             <LogOut size={16} />
             Disconnect Node
           </button>
@@ -611,7 +612,7 @@ const Admin = () => {
                                 (item.isEnabled === 1 || item.isEnabled === undefined) ? (
                                   <span className="badge bg-opacity-10 bg-success text-success border border-success border-opacity-20 px-2 py-1">Active</span>
                                 ) : (
-                                  <span className="badge bg-opacity-10 bg-secondary text-light border border-secondary border-opacity-20 px-2 py-1">Disabled</span>
+                                  <span className="badge bg-opacity-10 bg-secondary  border border-secondary border-opacity-20 px-2 py-1">Disabled</span>
                                 )
                               )}
                             </td>
@@ -649,7 +650,7 @@ const Admin = () => {
                   <h4 className="text-cyan fw-bold mb-0">
                     {listData.some(item => item.id === editingItem.id) ? 'Configure Record' : 'Create Record'}
                   </h4>
-                  <button onClick={() => setEditingItem(null)} className="btn btn-sm border border-secondary text-light">
+                  <button onClick={() => setEditingItem(null)} className="btn btn-sm border border-secondary ">
                     <X size={16} />
                   </button>
                 </div>
@@ -891,19 +892,19 @@ const Admin = () => {
                                 value={editingItem[imgField] || ''}
                                 onChange={e => {
                                   setEditingItem({ ...editingItem, [imgField]: e.target.value });
-                                  validateImageUrl(e.target.value);
+                                  validateMediaUrl(e.target.value);
                                 }}
                               />
                             </div>
                             <div className="col-auto">
                               <div className="position-relative">
-                                <button type="button" className="btn border border-secondary text-light px-3 py-2 d-flex align-items-center gap-1">
+                                <button type="button" className="btn border border-secondary  px-3 py-2 d-flex align-items-center gap-1">
                                   <Upload size={16} />
-                                  {uploading ? 'Uploading...' : 'Upload Image'}
+                                  {uploading ? 'Uploading...' : 'Upload File'}
                                 </button>
                                 <input 
                                   type="file" 
-                                  accept=".jpg,.jpeg,.png"
+                                  accept=".jpg,.jpeg,.png,.mp4,.webm,.mov"
                                   className="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
                                   onChange={e => handleFileUpload(e, imgField)}
                                   disabled={uploading}
@@ -912,7 +913,7 @@ const Admin = () => {
                             </div>
                           </div>
                           <span className="text-muted-custom d-block mt-1 font-monospace" style={{ fontSize: '0.75rem' }}>
-                            * System restricts uploads and path updates strictly to .jpg/.jpeg/.png formats.
+                            * Supported formats: Images (.jpg, .png) and Videos (.mp4, .webm).
                           </span>
                         </div>
                       );
@@ -1046,7 +1047,7 @@ const Admin = () => {
 
                   {/* Form Submission */}
                   <div className="d-flex justify-content-end gap-3 border-top border-secondary pt-4 mt-4">
-                    <button type="button" onClick={() => setEditingItem(null)} className="btn border border-secondary text-light px-4">
+                    <button type="button" onClick={() => setEditingItem(null)} className="btn border border-secondary  px-4">
                       Cancel
                     </button>
                     <button type="submit" className="btn btn-cyan px-4 d-flex align-items-center gap-2">

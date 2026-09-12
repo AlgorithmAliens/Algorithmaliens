@@ -50,20 +50,20 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|webp|gif/;
+  const filetypes = /jpeg|jpg|png|webp|gif|mp4|webm|mov/;
   const mimetype = filetypes.test(file.mimetype);
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
   if (mimetype && extname) {
     return cb(null, true);
   }
-  cb(new Error('Only images (jpg, jpeg, png, webp, gif) are allowed!'));
+  cb(new Error('Only images and videos (jpg, png, mp4, etc.) are allowed!'));
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
 // Upload route
