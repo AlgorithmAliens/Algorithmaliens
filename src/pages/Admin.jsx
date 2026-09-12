@@ -136,9 +136,9 @@ const Admin = () => {
   const validateImageUrl = (url) => {
     if (!url) return true;
     const cleanUrl = url.split('?')[0].split('#')[0];
-    const isJpg = cleanUrl.toLowerCase().endsWith('.jpg') || cleanUrl.toLowerCase().endsWith('.jpeg');
-    if (!isJpg) {
-      alert('Format warning: We strongly recommend using high-quality .jpg or .jpeg images for site-wide visual compliance.');
+    const isValidImage = cleanUrl.toLowerCase().endsWith('.jpg') || cleanUrl.toLowerCase().endsWith('.jpeg') || cleanUrl.toLowerCase().endsWith('.png');
+    if (!isValidImage) {
+      alert('Format warning: We strongly recommend using high-quality .jpg, .jpeg, or .png images for site-wide visual compliance.');
     }
     return true;
   };
@@ -147,10 +147,10 @@ const Admin = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Enforce strict JPG check
+    // Enforce JPG/JPEG/PNG check
     const extension = file.name.split('.').pop().toLowerCase();
-    if (extension !== 'jpg' && extension !== 'jpeg') {
-      alert('Action Blocked: Only JPG/JPEG file formats are supported.');
+    if (extension !== 'jpg' && extension !== 'jpeg' && extension !== 'png') {
+      alert('Action Blocked: Only JPG, JPEG, and PNG file formats are supported.');
       e.target.value = ''; // clear input
       return;
     }
@@ -899,11 +899,11 @@ const Admin = () => {
                               <div className="position-relative">
                                 <button type="button" className="btn border border-secondary text-light px-3 py-2 d-flex align-items-center gap-1">
                                   <Upload size={16} />
-                                  {uploading ? 'Uploading...' : 'Upload JPG'}
+                                  {uploading ? 'Uploading...' : 'Upload Image'}
                                 </button>
                                 <input 
                                   type="file" 
-                                  accept=".jpg,.jpeg"
+                                  accept=".jpg,.jpeg,.png"
                                   className="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
                                   onChange={e => handleFileUpload(e, imgField)}
                                   disabled={uploading}
@@ -912,7 +912,7 @@ const Admin = () => {
                             </div>
                           </div>
                           <span className="text-muted-custom d-block mt-1 font-monospace" style={{ fontSize: '0.75rem' }}>
-                            * System restricts uploads and path updates strictly to .jpg/.jpeg formats.
+                            * System restricts uploads and path updates strictly to .jpg/.jpeg/.png formats.
                           </span>
                         </div>
                       );
