@@ -254,7 +254,6 @@ export async function initDb() {
   const adminExists = await query.get("SELECT * FROM users WHERE username = ?", [defaultAdminUsername]);
   if (!adminExists) {
     const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "algo@951";
-
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(defaultPassword, salt);
     await query.run(
@@ -262,6 +261,13 @@ export async function initDb() {
       [defaultAdminUsername, passwordHash, "admin"]
     );
     console.log(`[DB] Seeded default admin user (username: ${defaultAdminUsername}).`);
+  } else if (process.env.ADMIN_DEFAULT_PASSWORD) {
+    // If ADMIN_DEFAULT_PASSWORD env var is explicitly set, always sync it to the DB.
+    // This allows password resets on hosted environments (e.g. Render) without shell access.
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync(process.env.ADMIN_DEFAULT_PASSWORD, salt);
+    await query.run("UPDATE users SET passwordHash = ? WHERE username = ?", [passwordHash, defaultAdminUsername]);
+    console.log(`[DB] Synced admin password from ADMIN_DEFAULT_PASSWORD env var.`);
   }
 
   // 3. Seed dynamic content tables if empty
